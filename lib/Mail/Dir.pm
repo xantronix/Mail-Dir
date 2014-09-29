@@ -221,7 +221,7 @@ sub deliver {
 
     my $file_new = "new/$name_new";
 
-    unless ( rename( $file_tmp, $file_new ) ) {
+    unless ( rename( $file_tmp => $file_new ) ) {
         die("Unable to deliver incoming message to $file_new: $!");
     }
 
