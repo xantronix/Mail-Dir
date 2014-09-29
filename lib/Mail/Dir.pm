@@ -12,6 +12,39 @@ use Sys::Hostname ();
 
 use Mail::Dir::Message ();
 
+=head1 NAME
+
+Mail::Dir - Compliant Maildir and Maildir++ delivery mechanism
+
+=head1 SYNOPSIS
+
+    use Mail::Dir;
+
+    my $maildir = Mail::Dir->open("$ENV{'HOME'}/Maildir");
+
+    $maildir->deliver('somefile.msg');
+
+    #
+    # Create a new Maildir++ mailbox with sub-mailboxes
+    #
+    my $maildirPP = Mail::Dir->open("$ENV{'HOME'}/newmaildir",
+        'with_extensions' => 1,
+        'create'          => 1
+    );
+
+    $maildirPP->create_mailbox('INBOX.foo');
+    $maildirPP->create_mailbox('INBOX.foo.bar');
+    $maildirPP->select_mailbox('INBOX.foo.bar');
+
+    $maildirPP->deliver(\*STDIN);
+
+=head1 DESCRIPTION
+
+C<Mail::Dir> provides a straightforward mechanism for delivering mail messages
+to a Maildir or Maildir++ mailbox.
+
+=cut
+
 our $VERSION = '0.01';
 
 my $MAX_BUFFER_LEN      = 4096;
@@ -28,6 +61,34 @@ sub dirs {
         'cur' => "$dir/cur"
     );
 }
+
+=head1 OPENING OR CREATING A MAILBOX
+
+=over
+
+=item C<Mail::Dir-E<gt>open(I<$dir>, I<%opts>)>
+
+Open or create a mailbox, in a manner dependent on the flags specified in
+I<%opts>, and returns an object representing the Maildir structure.
+
+Recognized option flags are:
+
+=over
+
+=item * C<create>
+
+When specified, create a Maildir inbox at I<$dir> if one does not already
+exist.
+
+=item * C<with_extensions>
+
+When specified, enable management and usage of Maildir++ sub-mailboxes.
+
+=back
+
+=back
+
+=cut
 
 sub open {
     my ( $class, $dir, %opts ) = @_;
