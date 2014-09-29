@@ -14,7 +14,8 @@ WriteMakefile(
     'LICENSE'      => 'mit',
     'ABSTRACT'     => 'A reasonable Maildir/Maildir++ delivery mechanism',
 
-    'PREREQ_PM'      => {},
+    'PREREQ_PM' => { 'Sys::Hostname' => 0 },
+
     'BUILD_REQUIRES' => {},
 
     'META_MERGE' => {

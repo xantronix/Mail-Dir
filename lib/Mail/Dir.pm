@@ -6,8 +6,9 @@ use warnings;
 use Errno;
 use IO::Handle;
 
-use Cwd   ();
-use Fcntl ();
+use Cwd           ();
+use Fcntl         ();
+use Sys::Hostname ();
 
 use Mail::Dir::Message ();
 
@@ -47,7 +48,7 @@ sub open {
         }
     }
 
-    chomp( my $hostname = `hostname` );
+    my $hostname = Sys::Hostname::hostname();
 
     return bless {
         'dir'             => $opts{'dir'},
