@@ -30,10 +30,11 @@ sub dirs {
 }
 
 sub open {
-    my ( $class, %opts ) = @_;
-    $opts{'dir'} ||= 'maildir';
+    my ( $class, $dir, %opts ) = @_;
 
-    my %dirs = dirs( $opts{'dir'} );
+    die('No Maildir path specified') unless $dir;
+
+    my %dirs = dirs($dir);
 
     foreach my $key (qw(dir tmp new cur)) {
         my $dir = $dirs{$key};
@@ -51,7 +52,7 @@ sub open {
     my $hostname = Sys::Hostname::hostname();
 
     return bless {
-        'dir'             => $opts{'dir'},
+        'dir'             => $dir,
         'with_extensions' => $opts{'with_extensions'} ? 1 : 0,
         'hostname'        => $hostname,
         'mailbox'         => $DEFAULT_MAILBOX,
