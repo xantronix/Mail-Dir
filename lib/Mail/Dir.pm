@@ -121,6 +121,20 @@ sub open {
     }, $class;
 }
 
+=head1 MANIPULATING MAILBOXES
+
+The following methods require Maildir++ extensions to be enabled for them to be
+usable.
+
+=over
+
+=item C<$maildir-E<gt>mailbox_dir(I<$mailbox>)>
+
+Return the physical location of the Maildir++ folder corresponding to
+I<$mailbox>.
+
+=cut
+
 sub mailbox_dir {
     my ( $self, $mailbox ) = @_;
     $mailbox ||= $self->mailbox;
@@ -133,6 +147,12 @@ sub mailbox_dir {
     return "$self->{'dir'}/.$subdir";
 }
 
+=item C<$maildir-E<gt>select_mailbox(I<$mailbox>)>
+
+Change the current mailbox to which mail is delivered, to I<$mailbox>.
+
+=cut
+
 sub select_mailbox {
     my ( $self, $mailbox ) = @_;
 
@@ -143,17 +163,35 @@ sub select_mailbox {
     return $self->{'mailbox'} = $mailbox;
 }
 
+=item C<$maildir-E<gt>mailbox()>
+
+Returns the name of the currently selected mailbox.
+
+=cut
+
 sub mailbox {
     my ($self) = @_;
 
     return $self->{'mailbox'};
 }
 
+=item C<$maildir-E<gt>mailbox_exists(I<$mailbox>)>
+
+Returns true if I<$mailbox> exists.
+
+=cut
+
 sub mailbox_exists {
     my ( $self, $mailbox ) = @_;
 
     return -d $self->mailbox_dir($mailbox);
 }
+
+=item C<$maildir-E<gt>parent_mailbox(I<$mailbox>)>
+
+Returns the name of the mailbox one level above I<$mailbox>.
+
+=cut
 
 sub parent_mailbox {
     my ($mailbox) = @_;
@@ -163,6 +201,15 @@ sub parent_mailbox {
 
     return join( '.', @components );
 }
+
+=item C<$maildir-E<gt>create_mailbox(I<$mailbox>)>
+
+Create the new I<$mailbox> if it does not already exist.  Will throw an error
+if the parent mailbox does not already exist.
+
+=back
+
+=cut
 
 sub create_mailbox {
     my ( $self, $mailbox ) = @_;
@@ -251,6 +298,36 @@ sub spool {
     return $size;
 }
 
+=head1 DELIVERING MESSAGES
+
+=over
+
+=item C<$maildir-E<gt>deliver(I<$from>)>
+
+Deliver a piece of mail from the source indicated by I<$from>.  The following
+types of values can be specified in I<$from>:
+
+=over
+
+=item * A C<CODE> reference
+
+When passed a C<CODE> reference, the subroutine specified in I<$from> is called,
+with a file handle passed that the subroutine may write mail data to.
+
+=item * A file handle
+
+The file handle passed in I<$from> is read until end-of-file condition is
+reached, and spooled to a new message in the current mailbox.
+
+=item * A filename
+
+The message at the filename indicated by I<$from> is spooled into the current
+mailbox.
+
+=back
+
+=cut
+
 sub deliver {
     my ( $self, $from ) = @_;
 
@@ -302,6 +379,35 @@ sub deliver {
     );
 }
 
+=back
+
+=head1 RETRIEVING MESSAGES
+
+=over
+
+=item C<$maildir-E<gt>messages(I<%opts>)>
+
+Return a list of L<Mail::Dir::Message> references containing mail messages as
+selected by the criteria specified in I<%opts>.  Options include:
+
+=over
+
+=item * C<tmp>, C<new>, C<cur>
+
+When any of these are set to 1, messages in those queues are processed.
+
+=item * C<filter>
+
+A subroutine can be passed via C<CODE> reference which filters for messages
+that are desired.  Each L<Mail::Dir::Message> object is passed to the
+subroutine as its sole argument, and is kept if the subroutine returns 1.
+
+=back
+
+=back
+
+=cut
+
 sub messages {
     my ( $self, %opts ) = @_;
     my $dir = $self->mailbox_dir;
@@ -343,6 +449,19 @@ sub messages {
     return \@ret;
 }
 
+=head1 PURGING EXPIRED MESSAGES
+
+=over
+
+=item C<$maildir-E<gt>purge()>
+
+Purge all messages in the C<tmp> queue that have not been accessed for the past
+36 hours.
+
+=back
+
+=cut
+
 sub purge {
     my ($self) = @_;
     my $time = time();
@@ -364,3 +483,14 @@ sub purge {
 }
 
 1;
+
+__END__
+
+=head1 AUTHOR
+
+Xan Tronix <xan@cpan.org>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2014, cPanel, Inc.  Distributed under the terms of the MIT
+license.
