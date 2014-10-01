@@ -1,6 +1,7 @@
 COPYRIGHT
 lib/Mail/Dir.pm
 lib/Mail/Dir/Message.pm
+t/lib-Mail-Dir.t
 LICENSE
 README.md
 Makefile.PL
