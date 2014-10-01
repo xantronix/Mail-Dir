@@ -49,8 +49,7 @@ to a Maildir or Maildir++ mailbox.
 
 # MANIPULATING MAILBOXES
 
-The following methods require Maildir++ extensions to be enabled for them to be
-usable.
+The following methods require Maildir++ extensions to be enabled.
 
 - `$maildir->mailbox_dir(_$mailbox_)`
 

@@ -123,8 +123,7 @@ sub open {
 
 =head1 MANIPULATING MAILBOXES
 
-The following methods require Maildir++ extensions to be enabled for them to be
-usable.
+The following methods require Maildir++ extensions to be enabled.
 
 =over
 
