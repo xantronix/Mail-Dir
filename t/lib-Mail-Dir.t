@@ -58,6 +58,14 @@ my $tmpdir = File::Temp::tempdir('CLEANUP' => 1);
     throws_ok {
         $maildir->mailbox_dir
     } qr/^\QMaildir++ extensions are required\E/, '$maildir->mailbox_dir() die()s when running on a mailbox without Maildir++ extensions';
+
+    throws_ok {
+        $maildir->select_mailbox('INBOX');
+    } qr/^\QMaildir++ extensions not enabled\E/, '$maildir->select_mailbox() die()s when running on a mailbox without Maildir++ extensions';
+
+    throws_ok {
+        $maildir->create_mailbox('INBOX.new');
+    } qr/^\QMaildir++ extensions not enabled\E/, '$maildir->create_mailbox() die()s when running on a mailbox without Maildir++ extensions';
 }
 
 {
@@ -94,6 +102,10 @@ my $tmpdir = File::Temp::tempdir('CLEANUP' => 1);
         $maildir->create_mailbox('INBOX.new');
     } '$maildir->create_mailbox() successfully creates a new mailbox';
 
+    throws_ok {
+        $maildir->create_mailbox('INBOX.impossible.mailbox');
+    } qr/^Parent mailbox does not exist/, '$maildir->create_inbox() die()s when passed a mailbox path with nonexistent parent';
+
     lives_ok {
         $maildir->select_mailbox('INBOX.new');
     } '$maildir->select_mailbox() will change the mailbox to INBOX.new without complaint';
@@ -103,4 +115,8 @@ my $tmpdir = File::Temp::tempdir('CLEANUP' => 1);
 
     isnt( $old => $new, '$maildir->mailbox_dir() returns a new result after changing mailbox to INBOX.new' );
     ok( -d $new, '$mailbox->mailbox_dir() returns a valid directory after changing mailbox to INBOX.new' );
+
+    throws_ok {
+        $maildir->select_mailbox('//invalid');
+    } qr/^Invalid mailbox name/, '$mailbox->select_mailbox() will die() if provided an invalid mailbox name';
 }
