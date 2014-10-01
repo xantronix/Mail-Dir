@@ -189,12 +189,6 @@ sub mailbox_exists {
     return -d $self->mailbox_dir($mailbox);
 }
 
-=item C<$maildir-E<gt>parent_mailbox(I<$mailbox>)>
-
-Returns the name of the mailbox one level above I<$mailbox>.
-
-=cut
-
 sub parent_mailbox {
     my ($mailbox) = @_;
 
