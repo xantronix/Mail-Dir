@@ -136,6 +136,9 @@ I<$mailbox>.
 
 sub mailbox_dir {
     my ( $self, $mailbox ) = @_;
+
+    die('Maildir++ extensions are required') unless $self->{'with_extensions'};
+
     $mailbox ||= $self->mailbox;
 
     my @components = split /\./, $mailbox;
