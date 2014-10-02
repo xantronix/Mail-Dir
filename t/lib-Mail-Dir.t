@@ -39,6 +39,28 @@ sub create_message_sub {
     };
 }
 
+sub create_tmp_message {
+    my ($maildir, $age) = @_;
+
+    $age ||= 0;
+    my $time = time() - $age;
+
+    my $dir = "$maildir->{'dir'}/tmp";
+
+    my $name = $maildir->name(
+        'from' => create_message_sub(),
+        'time' => $time
+    );
+
+    my $file = "$dir/$name";
+
+    create_message_file($file);
+
+    utime($time, $time, $file);
+
+    return $file;
+}
+
 my $tmpdir = File::Temp::tempdir('CLEANUP' => 1);
 
 {
@@ -175,6 +197,21 @@ my $tmpdir = File::Temp::tempdir('CLEANUP' => 1);
 
         is( scalar @{$messages} => 3, '$maildir->messages() able to retrieve all messages successfully with filter');
     }
+
+    {
+        note('Testing Maildir tmp message purging');
+        note('Queueing 38 hour-old message in tmp');
+
+        my $oldtmpfile = create_tmp_message( $maildir, 60 * 60 * 38 );
+        my $newtmpfile = create_tmp_message($maildir);
+
+        lives_ok {
+            $maildir->purge;
+        } '$maildir->purge() does not die() when purging messages';
+
+        ok( ! -f $oldtmpfile, '$maildir->purge() deleted messages older than 36 hours' );
+        ok( -f $newtmpfile, '$maildir->purge() does not delete messages less than 36 hours old' );
+    }
 }
 
 {
@@ -223,6 +260,36 @@ my $tmpdir = File::Temp::tempdir('CLEANUP' => 1);
     note('Testing Maildir++ message delivery');
 
     my $msgfile = "$tmpdir/msg.txt";
+    my $message;
 
     create_message_file($msgfile);
+
+    lives_ok {
+        $maildir->deliver($msgfile);
+    } '$maildir->deliver() succeeds when delivering message from file';
+
+    lives_ok {
+        $maildir->deliver(create_message_sub());
+    } '$maildir->deliver() succeeds when delivering message from CODE ref';
+
+    open(my $fh, '<', $msgfile);
+
+    lives_ok {
+        $message = $maildir->deliver($fh);
+    } '$maildir->deliver() succeeds when delivering message from file handle';
+
+    close $fh;
+
+    ok( -f $message->{'file'}, '$maildir->deliver() actually delivers message to new file' );
+    is( $message->{'dir'} => 'new', '$maildir->deliver() delivers mail to "new" queue' );
+
+    my $old_file = $message->{'file'};
+
+    lives_ok {
+        $message->move('INBOX');
+    } '$maildir->move() successfully moves message from INBOX.new to INBOX';
+
+    my $new_file = $message->{'file'};
+
+    isnt( $old_file => $new_file, '$maildir->move() actually relocated message from INBOX.new to INBOX' );
 }
