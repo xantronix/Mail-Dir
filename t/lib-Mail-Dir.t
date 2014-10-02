@@ -11,6 +11,34 @@ use Test::More ('no_plan');
 use Test::Exception;
 use Errno;
 
+sub create_message_text {
+    return <<EOF;
+From: Foo
+To: Bar
+Subject: Cats
+
+Meow!
+EOF
+}
+
+sub create_message_file {
+    my ($file) = @_;
+
+    open(my $fh, '>', $file) or die("Unable to open $file for writing: $!");
+    print {$fh} create_message_text();
+    close $fh;
+
+    return $file;
+}
+
+sub create_message_sub {
+    return sub {
+        my ($fh) = @_;
+        print {$fh} create_message_text();
+        return;
+    };
+}
+
 my $tmpdir = File::Temp::tempdir('CLEANUP' => 1);
 
 {
@@ -56,16 +84,97 @@ my $tmpdir = File::Temp::tempdir('CLEANUP' => 1);
     } 'Mail::Dir->open() will successfully open an existing Maildir directory';
 
     throws_ok {
-        $maildir->mailbox_dir
-    } qr/^\QMaildir++ extensions are required\E/, '$maildir->mailbox_dir() die()s when running on a mailbox without Maildir++ extensions';
-
-    throws_ok {
         $maildir->select_mailbox('INBOX');
     } qr/^\QMaildir++ extensions not enabled\E/, '$maildir->select_mailbox() die()s when running on a mailbox without Maildir++ extensions';
 
     throws_ok {
         $maildir->create_mailbox('INBOX.new');
     } qr/^\QMaildir++ extensions not enabled\E/, '$maildir->create_mailbox() die()s when running on a mailbox without Maildir++ extensions';
+
+    throws_ok {
+        $maildir->deliver;
+    } qr/^No message source provided/, '$maildir->deliver() die()s when no message source provided';
+
+    note('Testing Maildir message delivery');
+
+    my $msgfile = "$tmpdir/msg.txt";
+
+    create_message_file($msgfile);
+
+    lives_ok {
+        $maildir->deliver($msgfile);
+    } '$maildir->deliver() succeeds when delivering message from file';
+
+    lives_ok {
+        $maildir->deliver(create_message_sub());
+    } '$maildir->deliver() succeeds when delivering message from CODE ref';
+
+    open(my $fh, '<', $msgfile);
+
+    lives_ok {
+        $maildir->deliver($fh);
+    } '$maildir->deliver() succeeds when delivering message from file handle';
+
+    close $fh;
+
+    note('Testing Maildir message retrieval');
+
+    is( scalar @{$maildir->messages()} => 0, '$maildir->messages() returns nothing when passed no options' );
+
+    {
+        my $messages = $maildir->messages(
+            'tmp' => 1,
+            'new' => 1,
+            'cur' => 1
+        );
+
+        is( scalar @{$messages} => 3, '$maildir->messages() returns 3 messages for tmp, new and cur without a filter' );
+    }
+
+    {
+        my $messages = $maildir->messages(
+            'tmp' => 1,
+            'new' => 1,
+            'cur' => 1
+        );
+
+        foreach my $message (@{$messages}) {
+            my $fh;
+
+            lives_ok {
+                $fh = $message->open;
+            } '$message->open() able to open message as file';
+
+            close $fh if $fh;
+        }
+    }
+
+    {
+        my $messages = $maildir->messages(
+            'tmp' => 1,
+            'new' => 1,
+            'cur' => 1,
+            'filter' => sub {
+                my ($message) = @_;
+                my $match = 0;
+
+                my $fh = $message->open;
+
+                while (my $line = readline($fh)) {
+                    chomp $line;
+
+                    if ($line =~ /^From: Foo/) {
+                        $match = 1;
+                        last;
+                    }
+                }
+
+                return $match;
+            }
+        );
+
+        is( scalar @{$messages} => 3, '$maildir->messages() able to retrieve all messages successfully with filter');
+    }
 }
 
 {
@@ -87,9 +196,6 @@ my $tmpdir = File::Temp::tempdir('CLEANUP' => 1);
         );
     } 'Mail::Dir->open() will open an existing Maildir++ queue without complaint';
 
-    ok( -d $maildir->mailbox_dir, '$maildir->mailbox_dir() returns the current Maildir++ physical directory' );
-    ok( -d $maildir->mailbox_dir('INBOX'), '$maildir->mailbox_dir() returns the physical location of INOBX' );
-
     lives_ok {
         $maildir->select_mailbox('INBOX');
     } '$maildir->select_mailbox() will change the mailbox to INBOX without complaint';
@@ -110,13 +216,13 @@ my $tmpdir = File::Temp::tempdir('CLEANUP' => 1);
         $maildir->select_mailbox('INBOX.new');
     } '$maildir->select_mailbox() will change the mailbox to INBOX.new without complaint';
 
-    my $old = $maildir->mailbox_dir('INBOX');
-    my $new = $maildir->mailbox_dir;
-
-    isnt( $old => $new, '$maildir->mailbox_dir() returns a new result after changing mailbox to INBOX.new' );
-    ok( -d $new, '$mailbox->mailbox_dir() returns a valid directory after changing mailbox to INBOX.new' );
-
     throws_ok {
         $maildir->select_mailbox('//invalid');
-    } qr/^Invalid mailbox name/, '$mailbox->select_mailbox() will die() if provided an invalid mailbox name';
+    } qr/^Invalid mailbox name/, '$maildir->select_mailbox() will die() if provided an invalid mailbox name';
+
+    note('Testing Maildir++ message delivery');
+
+    my $msgfile = "$tmpdir/msg.txt";
+
+    create_message_file($msgfile);
 }

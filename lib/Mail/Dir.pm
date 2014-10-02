@@ -121,23 +121,8 @@ sub open {
     }, $class;
 }
 
-=head1 MANIPULATING MAILBOXES
-
-The following methods require Maildir++ extensions to be enabled.
-
-=over
-
-=item C<$maildir-E<gt>mailbox_dir(I<$mailbox>)>
-
-Return the physical location of the Maildir++ folder corresponding to
-I<$mailbox>.
-
-=cut
-
 sub mailbox_dir {
     my ( $self, $mailbox ) = @_;
-
-    die('Maildir++ extensions are required') unless $self->{'with_extensions'};
 
     $mailbox ||= $self->mailbox;
 
@@ -148,6 +133,12 @@ sub mailbox_dir {
 
     return "$self->{'dir'}/.$subdir";
 }
+
+=head1 MANIPULATING MAILBOXES
+
+The following methods require Maildir++ extensions to be enabled.
+
+=over
 
 =item C<$maildir-E<gt>select_mailbox(I<$mailbox>)>
 
@@ -256,8 +247,8 @@ sub spool {
 
     my $size = 0;
 
-    my $from = $args{'from'} or die('No message file, handle or source subroutine specified to spool from');
-    my $to   = $args{'to'}   or die('No message file specified to spool to');
+    my $from = $args{'from'};
+    my $to   = $args{'to'};
 
     sysopen( my $fh_to, $to, &Fcntl::O_CREAT | &Fcntl::O_WRONLY ) or die("Unable to open $to for writing: $!");
 
@@ -275,7 +266,7 @@ sub spool {
         if ( ref($from) eq 'GLOB' ) {
             $fh_from = $from;
         }
-        elsif ( !defined ref($from) ) {
+        elsif ( ref($from) eq '' || !defined ref($from) ) {
             sysopen( $fh_from, $from, &Fcntl::O_RDONLY ) or die("Unable to open $from for reading: $!");
         }
 
@@ -326,6 +317,8 @@ mailbox.
 
 sub deliver {
     my ( $self, $from ) = @_;
+
+    die('No message source provided') unless defined $from;
 
     my $oldcwd = Cwd::getcwd() or die("Unable to getcwd(): $!");
     my $dir    = $self->mailbox_dir;

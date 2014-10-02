@@ -68,6 +68,26 @@ sub from_file {
     }, $class;
 }
 
+=head1 READING MESSAGES
+
+=over
+
+=item C<$message-E<gt>open()>
+
+Open the current message, returning a file handle.  Will die() if any errors
+are encountered.  It is the caller's responsibility to subsequently close the
+file handle when it is no longer required.
+
+=cut
+
+sub open {
+    my ($self) = @_;
+
+    CORE::open(my $fh, '<', $self->{'file'}) or die("Unable to open message file $self->{'file'} for reading: $!");
+
+    return $fh;
+}
+
 =head1 MOVING MESSAGES
 
 =over
@@ -177,6 +197,16 @@ The following methods can be used to quickly check for specific message state
 flags.
 
 =over
+
+=item C<$message-E<gt>flags()>
+
+Returns a string containing all the flags set for the current message.
+
+=cut
+
+sub flags {
+    shift->{'flags'};
+}
 
 =item C<$message-E<gt>passed()>
 
