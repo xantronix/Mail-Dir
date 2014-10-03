@@ -83,7 +83,7 @@ file handle when it is no longer required.
 sub open {
     my ($self) = @_;
 
-    CORE::open(my $fh, '<', $self->{'file'}) or die("Unable to open message file $self->{'file'} for reading: $!");
+    CORE::open( my $fh, '<', $self->{'file'} ) or die("Unable to open message file $self->{'file'} for reading: $!");
 
     return $fh;
 }
