@@ -148,7 +148,7 @@ than one flag may be specified in a single call, in any order.
 
 Mark the message as "Passed".
 
-=item * C<P>
+=item * C<R>
 
 Mark the message as "Replied".
 
@@ -246,7 +246,7 @@ its best buds.
 =cut
 
 sub trashed {
-    shift->{'flags'} = /T/;
+    shift->{'flags'} =~ /T/;
 }
 
 =item C<$message-E<gt>draft()>
