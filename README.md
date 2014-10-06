@@ -14,8 +14,8 @@ Mail::Dir - Compliant Maildir and Maildir++ delivery mechanism
     # Create a new Maildir++ mailbox with sub-mailboxes
     #
     my $maildirPP = Mail::Dir->open("$ENV{'HOME'}/newmaildir",
-        'with_extensions' => 1,
-        'create'          => 1
+        'maildir++' => 1,
+        'create'    => 1
     );
 
     $maildirPP->create_mailbox('INBOX.foo');
@@ -43,18 +43,13 @@ to a Maildir or Maildir++ mailbox.
         When specified, create a Maildir inbox at _$dir_ if one does not already
         exist.
 
-    - `with_extensions`
+    - `maildir++`
 
         When specified, enable management and usage of Maildir++ sub-mailboxes.
 
 # MANIPULATING MAILBOXES
 
 The following methods require Maildir++ extensions to be enabled.
-
-- `$maildir->mailbox_dir(_$mailbox_)`
-
-    Return the physical location of the Maildir++ folder corresponding to
-    _$mailbox_.
 
 - `$maildir->select_mailbox(_$mailbox_)`
 
@@ -67,10 +62,6 @@ The following methods require Maildir++ extensions to be enabled.
 - `$maildir->mailbox_exists(_$mailbox_)`
 
     Returns true if _$mailbox_ exists.
-
-- `$maildir->parent_mailbox(_$mailbox_)`
-
-    Returns the name of the mailbox one level above _$mailbox_.
 
 - `$maildir->create_mailbox(_$mailbox_)`
 
@@ -134,4 +125,4 @@ Xan Tronix <xan@cpan.org>
 # COPYRIGHT
 
 Copyright (c) 2014, cPanel, Inc.  Distributed under the terms of the MIT
-license.
+license.  See the LICENSE file for further details.

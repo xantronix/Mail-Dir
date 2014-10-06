@@ -1,3 +1,10 @@
+# Copyright (c) 2014 cPanel, Inc.
+# All rights reserved.
+# http://cpanel.net/
+#
+# Distributed under the terms of the MIT license.  See the LICENSE file for
+# further details.
+
 package Mail::Dir;
 
 use strict;
@@ -28,8 +35,8 @@ Mail::Dir - Compliant Maildir and Maildir++ delivery mechanism
     # Create a new Maildir++ mailbox with sub-mailboxes
     #
     my $maildirPP = Mail::Dir->open("$ENV{'HOME'}/newmaildir",
-        'with_extensions' => 1,
-        'create'          => 1
+        'maildir++' => 1,
+        'create'    => 1
     );
 
     $maildirPP->create_mailbox('INBOX.foo');
@@ -80,7 +87,7 @@ Recognized option flags are:
 When specified, create a Maildir inbox at I<$dir> if one does not already
 exist.
 
-=item * C<with_extensions>
+=item * C<maildir++>
 
 When specified, enable management and usage of Maildir++ sub-mailboxes.
 
@@ -106,19 +113,38 @@ sub open {
             }
         }
         else {
-            die("Not a directory: $!") unless -d $dir;
+            die("$dir: Not a directory") unless -d $dir;
         }
     }
 
     my $hostname = Sys::Hostname::hostname();
 
     return bless {
-        'dir'             => $dir,
-        'with_extensions' => $opts{'with_extensions'} ? 1 : 0,
-        'hostname'        => $hostname,
-        'mailbox'         => $DEFAULT_MAILBOX,
-        'deliveries'      => 0
+        'dir'        => $dir,
+        'maildir++'  => $opts{'maildir++'} ? 1 : 0,
+        'hostname'   => $hostname,
+        'mailbox'    => $DEFAULT_MAILBOX,
+        'deliveries' => 0
     }, $class;
+}
+
+sub validate_mailbox_name {
+    my ($mailbox) = @_;
+
+    my @components = split( /\./, $mailbox ) or die("Invalid mailbox name $mailbox");
+
+    my $first = $components[0];
+
+    if ( $first =~ /^\~/ ) {
+        die("Invalid mailbox name $mailbox: Name cannot start with a tilde");
+    }
+
+    foreach my $component (@components) {
+        die("Invalid mailbox name $mailbox: Name cannot contain '..'") if $component eq '';
+        die("Invalid mailbox name $mailbox: Name cannot contain '/'")  if $component =~ /\//;
+    }
+
+    return;
 }
 
 sub mailbox_dir {
@@ -126,8 +152,13 @@ sub mailbox_dir {
 
     $mailbox ||= $self->mailbox;
 
+    validate_mailbox_name($mailbox);
+
+    if ( $mailbox eq $DEFAULT_MAILBOX ) {
+        return $self->{'dir'};
+    }
+
     my @components = split /\./, $mailbox;
-    shift @components;
 
     my $subdir = join( '.', @components );
 
@@ -149,9 +180,11 @@ Change the current mailbox to which mail is delivered, to I<$mailbox>.
 sub select_mailbox {
     my ( $self, $mailbox ) = @_;
 
-    die('Maildir++ extensions not enabled') unless $self->{'with_extensions'};
-    die('Invalid mailbox name')             unless $mailbox =~ /^$DEFAULT_MAILBOX(?:\..*)*$/;
-    die('Mailbox does not exist')           unless -d $self->mailbox_dir($mailbox);
+    die('Maildir++ extensions not enabled') unless $self->{'maildir++'};
+
+    validate_mailbox_name($mailbox);
+
+    die('Mailbox does not exist') unless -d $self->mailbox_dir($mailbox);
 
     return $self->{'mailbox'} = $mailbox;
 }
@@ -201,7 +234,7 @@ if the parent mailbox does not already exist.
 sub create_mailbox {
     my ( $self, $mailbox ) = @_;
 
-    die('Maildir++ extensions not enabled') unless $self->{'with_extensions'};
+    die('Maildir++ extensions not enabled') unless $self->{'maildir++'};
     die('Parent mailbox does not exist') unless $self->mailbox_exists( parent_mailbox($mailbox) );
 
     my %dirs = dirs( $self->mailbox_dir($mailbox) );
@@ -223,7 +256,7 @@ sub name {
 
     my $name = sprintf( "%d.P%dQ%d.%s", $time, $$, $self->{'deliveries'}, $self->{'hostname'} );
 
-    if ( $self->{'with_extensions'} ) {
+    if ( $self->{'maildir++'} ) {
         my $size;
 
         if ( defined $args{'size'} ) {
@@ -266,7 +299,7 @@ sub spool {
         if ( ref($from) eq 'GLOB' ) {
             $fh_from = $from;
         }
-        elsif ( ref($from) eq '' || !defined ref($from) ) {
+        elsif ( ref($from) eq '' ) {
             sysopen( $fh_from, $from, &Fcntl::O_RDONLY ) or die("Unable to open $from for reading: $!");
         }
 
@@ -490,4 +523,4 @@ Xan Tronix <xan@cpan.org>
 =head1 COPYRIGHT
 
 Copyright (c) 2014, cPanel, Inc.  Distributed under the terms of the MIT
-license.
+license.  See the LICENSE file for further details.

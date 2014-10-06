@@ -1,3 +1,10 @@
+# Copyright (c) 2014 cPanel, Inc.
+# All rights reserved.
+# http://cpanel.net/
+#
+# Distributed under the terms of the MIT license.  See the LICENSE file for
+# further details.
+
 package Mail::Dir::Message;
 
 use strict;
@@ -105,7 +112,7 @@ extensions.
 sub move {
     my ( $self, $mailbox ) = @_;
 
-    die('Maildir++ extensions not supported') unless $self->{'maildir'}->{'with_extensions'};
+    die('Maildir++ extensions not supported') unless $self->{'maildir'}->{'maildir++'};
     die('Specified mailbox is same as current mailbox') if $mailbox eq $self->{'maildir'}->{'mailbox'};
 
     my $mailbox_dir = $self->{'maildir'}->mailbox_dir($mailbox);
@@ -284,4 +291,4 @@ Xan Tronix <xan@cpan.org>
 =head1 COPYRIGHT
 
 Copyright (c) 2014, cPanel, Inc.  Distributed under the terms of the MIT
-license.
+license.  See the LICENSE file for further details.

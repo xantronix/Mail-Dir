@@ -1,5 +1,12 @@
 #! perl
 
+# Copyright (c) 2014 cPanel, Inc.
+# All rights reserved.
+# http://cpanel.net/
+#
+# Distributed under the terms of the MIT license.  See the LICENSE file for
+# further details.
+
 use strict;
 use warnings;
 
@@ -7,7 +14,7 @@ use File::Temp ();
 
 use Mail::Dir ();
 
-use Test::More ('no_plan');
+use Test::More ( 'tests' => 68 );
 use Test::Exception;
 use Errno;
 
@@ -85,7 +92,7 @@ my $tmpdir = File::Temp::tempdir( 'CLEANUP' => 1 );
     throws_ok {
         Mail::Dir->open('/dev/null');
     }
-    qr/^Not a directory/, 'Mail::Dir->open() die()s if passed a non-directory path';
+    qr/^\/dev\/null: Not a directory/, 'Mail::Dir->open() die()s if passed a non-directory path';
 
     eval { Mail::Dir->open($maildir_path); };
 
@@ -238,8 +245,8 @@ my $tmpdir = File::Temp::tempdir( 'CLEANUP' => 1 );
     lives_ok {
         $maildir = Mail::Dir->open(
             $maildir_path,
-            'create'          => 1,
-            'with_extensions' => 1
+            'create'    => 1,
+            'maildir++' => 1
         );
     }
     'Mail::Dir->open() will create a new Maildir++ queue without complaint';
@@ -247,7 +254,7 @@ my $tmpdir = File::Temp::tempdir( 'CLEANUP' => 1 );
     lives_ok {
         Mail::Dir->open(
             $maildir_path,
-            'with_extensions' => 1
+            'maildir++' => 1
         );
     }
     'Mail::Dir->open() will open an existing Maildir++ queue without complaint';
@@ -362,4 +369,31 @@ my $tmpdir = File::Temp::tempdir( 'CLEANUP' => 1 );
     ok( $message->trashed, '$maildir->trashed() returns true' );
     ok( $message->draft,   '$maildir->draft() returns true' );
     ok( $message->flagged, '$maildir->flagged() returns true' );
+}
+
+{
+    my $tmpdir = File::Temp::tempdir( 'cleanup' => 1 );
+
+    my $maildir = Mail::Dir->open(
+        $tmpdir,
+        'create'    => 1,
+        'maildir++' => 1
+    );
+
+    my %TESTS = (
+        'INBOX'               => $tmpdir,
+        'INBOX.foo'           => "$tmpdir/.INBOX.foo",
+        'INBOX.bar'           => "$tmpdir/.INBOX.bar",
+        'Spam'                => "$tmpdir/.Spam",
+        'Dating.PlentyOfFish' => "$tmpdir/.Dating.PlentyOfFish",
+        'Dating.OkCupid'      => "$tmpdir/.Dating.OkCupid"
+    );
+
+    note('Testing mailbox directory mapping');
+
+    foreach my $mailbox ( sort keys %TESTS ) {
+        my $expected = $TESTS{$mailbox};
+
+        is( $maildir->mailbox_dir($mailbox) => $expected, "Mailbox $mailbox maps to directory $expected" );
+    }
 }
