@@ -1,0 +1,7 @@
+Version 0.02
+
+    Fix issue preventing Mail::Dir inheritance
+
+Version 0.01
+
+    Initial release

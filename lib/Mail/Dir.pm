@@ -52,7 +52,7 @@ to a Maildir or Maildir++ mailbox.
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 my $MAX_BUFFER_LEN      = 4096;
 my $MAX_TMP_LAST_ACCESS = 129600;
