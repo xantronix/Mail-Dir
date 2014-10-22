@@ -41,7 +41,7 @@ sub from_file {
     my ( $class, %args ) = @_;
 
     die('No Maildir object specified')           unless defined $args{'maildir'};
-    die('Maildir object is of incorrect type')   unless ref( $args{'maildir'} ) eq 'Mail::Dir';
+    die('Maildir object is of incorrect type')   unless $args{'maildir'}->isa('Mail::Dir');
     die('No mailbox specified')                  unless defined $args{'mailbox'};
     die('No message filename specified')         unless defined $args{'file'};
     die('No message name specified')             unless defined $args{'name'};
