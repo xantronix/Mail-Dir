@@ -116,7 +116,7 @@ The following methods require Maildir++ extensions to be enabled.
 
 # SEE ALSO
 
-- `[Mail::Dir::Message](https://metacpan.org/pod/Mail::Dir::Message)` - Manipulate messages in a Maildir queue
+- [`Mail::Dir::Message`](https://metacpan.org/pod/Mail::Dir::Message) - Manipulate messages in a Maildir queue
 
 # AUTHOR
 
