@@ -95,6 +95,8 @@ sub open {
     return $fh;
 }
 
+=back
+
 =head1 MOVING MESSAGES
 
 =over
