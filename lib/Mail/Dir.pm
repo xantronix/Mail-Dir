@@ -512,7 +512,7 @@ __END__
 
 =over
 
-=item C<L<Mail::Dir::Message>> - Manipulate messages in a Maildir queue
+=item L<C<Mail::Dir::Message>> - Manipulate messages in a Maildir queue
 
 =back
 
