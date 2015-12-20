@@ -146,7 +146,7 @@ sub parse_flags {
 
 =over
 
-=item C<$message-E<gt>mark(I<$flags>)>
+=item C<$message-E<gt>mark(I<$flags>, I<$queue>)>
 
 Set any of the following message status flags on the current message.  More
 than one flag may be specified in a single call, in any order.
@@ -179,22 +179,54 @@ Mark the message as "Flagged".
 
 =back
 
+You can also specify the queue to which the message will be moved:
+
+=over
+
+=item * Missing or undefined
+
+Move the message to C<cur>.
+
+=item * C<tmp>
+
+Move the message to C<tmp>.
+
+=item * C<new>
+
+Move the message to C<new>.
+
+=item * C<cur>
+
+Move the message to C<cur>.
+
+=item * C<keepq>
+
+Keep the message in the same queue, do not move it.
+
 =back
 
 =cut
 
 sub mark {
-    my ( $self, $flags ) = @_;
+    my ( $self, $flags, $dir ) = @_;
     $flags = parse_flags($flags);
 
+    if ( defined $dir ) {
+        die('Queue may only be "keepq", "tmp", "new" or "cur"') unless $dir =~ /^(?:keepq|tmp|new|cur)$/;
+        $dir = $self->{'dir'} if $dir eq 'keepq';
+    }
+    else {
+        $dir = 'cur';
+    }
+
     my $mailbox_dir = $self->{'maildir'}->mailbox_dir( $self->{'mailbox'} );
-    my $new_file    = "$mailbox_dir/cur/$self->{'name'}:2,$flags";
+    my $new_file    = "$mailbox_dir/$dir/$self->{'name'}:2,$flags";
 
     unless ( rename( $self->{'file'}, $new_file ) ) {
         die("Unable to rename() $self->{'file'} to $new_file: $!");
     }
 
-    $self->{'dir'}   = 'cur';
+    $self->{'dir'}   = $dir;
     $self->{'file'}  = $new_file;
     $self->{'flags'} = $flags;
 
