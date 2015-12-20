@@ -142,6 +142,27 @@ sub parse_flags {
     return $ret;
 }
 
+=head1 REMOVING MESSAGES
+
+=over
+
+=item C<$message-E<gt>remove()>
+
+Unlink the current message.
+This method has the same return value as L<perlfunc/unlink>.
+B<Note:> if removal succeeds, the object is no longer valid and should be disposed of.
+
+Do not use this to soft-delete messages. For that, set the C<T> flag instead.
+
+=back
+
+=cut
+
+sub remove {
+    my ( $self ) = @_;
+    return unlink $self->{'file'};
+}
+
 =head1 SETTING MESSAGE FLAGS
 
 =over
