@@ -194,6 +194,7 @@ sub mark {
         die("Unable to rename() $self->{'file'} to $new_file: $!");
     }
 
+    $self->{'dir'}   = 'cur';
     $self->{'file'}  = $new_file;
     $self->{'flags'} = $flags;
 
