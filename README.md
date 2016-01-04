@@ -118,11 +118,16 @@ The following methods require Maildir++ extensions to be enabled.
 
 - [`Mail::Dir::Message`](https://metacpan.org/pod/Mail::Dir::Message) - Manipulate messages in a Maildir queue
 
+# CONTRIBUTORS
+
+- Nova Patch &lt;patch@cpan.org>
+- Aristotle Pagaltzis &lt;pagaltzis@gmx.de>
+
 # AUTHOR
 
-Xan Tronix <xan@cpan.org>
+Alexandra Hrefna Hilmisdóttir &lt;xan@cpan.org>
 
 # COPYRIGHT
 
-Copyright (c) 2014, cPanel, Inc.  Distributed under the terms of the MIT
+Copyright (c) 2016, cPanel, Inc.  Distributed under the terms of the MIT
 license.  See the LICENSE file for further details.

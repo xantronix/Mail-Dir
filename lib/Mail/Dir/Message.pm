@@ -1,4 +1,4 @@
-# Copyright (c) 2014 cPanel, Inc.
+# Copyright (c) 2016 cPanel, Inc.
 # All rights reserved.
 # http://cpanel.net/
 #
@@ -342,9 +342,9 @@ __END__
 
 =head1 AUTHOR
 
-Xan Tronix <xan@cpan.org>
+Alexandra Hrefna Hilmisdóttir <xan@cpan.org>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2014, cPanel, Inc.  Distributed under the terms of the MIT
+Copyright (c) 2016, cPanel, Inc.  Distributed under the terms of the MIT
 license.  See the LICENSE file for further details.

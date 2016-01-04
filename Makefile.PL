@@ -1,4 +1,4 @@
-# Copyright (c) 2014, cPanel, Inc.
+# Copyright (c) 2016, cPanel, Inc.
 # All rights reserved.
 # http://cpanel.net/
 #
@@ -10,7 +10,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     'NAME'         => 'Mail::Dir',
     'VERSION_FROM' => 'lib/Mail/Dir.pm',
-    'AUTHOR'       => 'Xan Tronix <xan@cpan.org>',
+    'AUTHOR'       => 'Alexandra Hrefna Hilmisdóttir <xan@cpan.org>',
     'LICENSE'      => 'mit',
     'ABSTRACT'     => 'A reasonable Maildir/Maildir++ delivery mechanism',
 

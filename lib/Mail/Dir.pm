@@ -1,4 +1,4 @@
-# Copyright (c) 2014 cPanel, Inc.
+# Copyright (c) 2016 cPanel, Inc.
 # All rights reserved.
 # http://cpanel.net/
 #
@@ -18,6 +18,14 @@ use Fcntl         ();
 use Sys::Hostname ();
 
 use Mail::Dir::Message ();
+
+our $VERSION = '0.03';
+
+my $MAX_BUFFER_LEN      =   4096;
+my $MAX_TMP_LAST_ACCESS = 129600;
+my $DEFAULT_MAILBOX     = 'INBOX';
+
+=encoding utf8
 
 =head1 NAME
 
@@ -51,12 +59,6 @@ C<Mail::Dir> provides a straightforward mechanism for delivering mail messages
 to a Maildir or Maildir++ mailbox.
 
 =cut
-
-our $VERSION = '0.02';
-
-my $MAX_BUFFER_LEN      = 4096;
-my $MAX_TMP_LAST_ACCESS = 129600;
-my $DEFAULT_MAILBOX     = 'INBOX';
 
 sub dirs {
     my ($dir) = @_;
@@ -516,11 +518,21 @@ __END__
 
 =back
 
+=head1 CONTRIBUTORS
+
+=over
+
+=item Nova Patch <patch@cpan.org>
+
+=item Aristotle Pagaltzis <pagaltzis@gmx.de>
+
+=back
+
 =head1 AUTHOR
 
-Xan Tronix <xan@cpan.org>
+Alexandra Hrefna Hilmisdóttir <xan@cpan.org>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2014, cPanel, Inc.  Distributed under the terms of the MIT
+Copyright (c) 2016, cPanel, Inc.  Distributed under the terms of the MIT
 license.  See the LICENSE file for further details.
